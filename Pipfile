@@ -5,7 +5,12 @@ name = "pypi"
 
 [packages]
 fastapi = {extras = ["all"], version = "*"}
-sqlalchemy = "*"
+alembic = "*"
+psycopg2-binary = "*"
+postgres = "*"
+cryptography = "*"
+sqlalchemy = {extras = ["asyncio"], version = "*"}
+asyncpg = "*"
 
 [dev-packages]
 
