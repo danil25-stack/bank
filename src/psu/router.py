@@ -36,15 +36,13 @@ async def get_all_psu(
     total_query = await db.execute(select(func.count(Psu.id)))
     total = total_query.scalar()
 
-    query = query.limit(limit).offset(offset)  # apply pagination
-    result = await db.execute(query)
-    items = result.scalars().all()
-
     result = await db.execute(
         select(Psu)
         .offset(offset)
         .limit(limit)
     )
+
+    items = result.scalars().all()
 
     for item in items:
         item.decrypt_fields()
@@ -63,10 +61,3 @@ async def delete_psu(psu_id: int, db: AsyncSession = Depends(get_db)):
     if not deleted:
         raise HTTPException(404, "PSU not found")
     return {"message": "PSU deleted successfully"}
-
-
-@router.get("/secure")
-async def secure_endpoint(request):
-    # client cert info доступна через request.scope["client_cert"] только если ты сам её туда положишь.
-    # Для демо просто вернём 200, если TLS прошёл.
-    return {"status": "ok, mTLS passed"}
