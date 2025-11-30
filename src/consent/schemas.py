@@ -1,6 +1,7 @@
 from datetime import date, datetime
 from typing import Optional, Dict
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
+from typing import List
 
 
 class ConsentBase(BaseModel):
@@ -31,5 +32,11 @@ class ConsentOut(ConsentBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
+
+
+class PaginatedConsent(BaseModel):
+    total: int
+    limit: int
+    offset: int
+    items: List[ConsentOut]

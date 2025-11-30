@@ -1,4 +1,5 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
+from typing import List
 
 
 class AccountCreate(BaseModel):
@@ -14,5 +15,11 @@ class AccountCreate(BaseModel):
 class AccountOut(AccountCreate):
     id: int
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
+
+
+class PaginatedAccount(BaseModel):
+    total: int
+    limit: int
+    offset: int
+    items: List[AccountOut]

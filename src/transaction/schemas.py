@@ -1,5 +1,6 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import date
+from typing import List
 
 
 class TransactionCreate(BaseModel):
@@ -17,5 +18,11 @@ class TransactionCreate(BaseModel):
 class TransactionOut(TransactionCreate):
     id: int
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
+
+
+class PaginatedTransaction(BaseModel):
+    total: int
+    limit: int
+    offset: int
+    items: List[TransactionOut]

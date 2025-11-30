@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func
 
 from src.database import get_db
 from src.loan import cruds
-from src.loan.schemas import LoanCreate, LoanOut
+from src.loan.schemas import LoanCreate, LoanOut, PaginatedLoan
+from src.loan.models import Loan
 
 router = APIRouter(
     prefix="/loans",
@@ -25,9 +27,31 @@ async def get_loan(loan_id: int, db: AsyncSession = Depends(get_db)):
     return loan
 
 
-@router.get("/", response_model=list[LoanOut])
-async def get_all_loans(db: AsyncSession = Depends(get_db)):
-    return await cruds.get_all_loans(db)
+@router.get("/", response_model=PaginatedLoan)
+async def get_all_loans(
+    limit: int = 10,
+    offset: int = 0,
+    db: AsyncSession = Depends(get_db)
+):
+    total_query = await db.execute(select(func.count(Loan.id)))
+    total = total_query.scalar()
+
+    result = await db.execute(
+        select(Loan)
+        .offset(offset)
+        .limit(limit)
+    )
+    items = result.scalars().all()
+
+    for item in items:
+        item.decrypt_fields()
+
+    return PaginatedLoan(
+        total=total,
+        limit=limit,
+        offset=offset,
+        items=items,
+    )
 
 
 @router.delete("/{loan_id}")

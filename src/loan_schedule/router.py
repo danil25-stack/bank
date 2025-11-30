@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func
 
 from src.database import get_db
 from src.loan_schedule import cruds
-from src.loan_schedule.schemas import LoanScheduleCreate, LoanScheduleOut
+from src.loan_schedule.schemas import LoanScheduleCreate, LoanScheduleOut, PaginatedLoanSchedule
+from src.loan_schedule.models import LoanRepaymentScheduleItem
 
 router = APIRouter(
     prefix="/loan-schedule",
@@ -24,9 +26,31 @@ async def get_schedule_item_route(item_id: int, db: AsyncSession = Depends(get_d
     return item
 
 
-@router.get("/", response_model=list[LoanScheduleOut])
-async def get_all_schedule_items_route(db: AsyncSession = Depends(get_db)):
-    return await cruds.get_all_schedule_items(db)
+@router.get("/", response_model=PaginatedLoanSchedule)
+async def get_all_schedule_items_route(
+    limit: int = 10,
+    offset: int = 0,
+    db: AsyncSession = Depends(get_db)
+):
+    total_query = await db.execute(select(func.count(LoanRepaymentScheduleItem.id)))
+    total = total_query.scalar()
+
+    result = await db.execute(
+        select(LoanRepaymentScheduleItem)
+        .offset(offset)
+        .limit(limit)
+    )
+    items = result.scalars().all()
+
+    for item in items:
+        item.decrypt_fields()
+
+    return PaginatedLoanSchedule(
+        total=total,
+        limit=limit,
+        offset=offset,
+        items=items,
+    )
 
 
 @router.delete("/{item_id}")

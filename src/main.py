@@ -8,6 +8,7 @@ from src.psu.router import router as psu_router
 from src.balance.router import router as balance_router
 from src.transaction.router import router as transaction_router
 from src.loan_schedule.router import router as loan_schedule_router
+from src.auth.router import router as auth_router
 
 
 app = FastAPI()
@@ -18,6 +19,7 @@ app.include_router(psu_router)
 app.include_router(balance_router)
 app.include_router(transaction_router)
 app.include_router(loan_schedule_router)
+app.include_router(auth_router)
 
 
 @app.get('/')

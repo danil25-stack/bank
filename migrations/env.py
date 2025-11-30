@@ -12,6 +12,7 @@ from src.loan.models import Loan
 from src.balance.models import Balance
 from src.transaction.models import Transaction
 from src.loan_schedule.models import LoanRepaymentScheduleItem
+from src.auth.models import User
 
 config = context.config
 

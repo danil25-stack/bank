@@ -1,5 +1,6 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import date
+from typing import List
 
 
 class LoanScheduleCreate(BaseModel):
@@ -16,5 +17,11 @@ class LoanScheduleCreate(BaseModel):
 class LoanScheduleOut(LoanScheduleCreate):
     id: int
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
+
+
+class PaginatedLoanSchedule(BaseModel):
+    total: int
+    limit: int
+    offset: int
+    items: List[LoanScheduleOut]
