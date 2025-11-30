@@ -14,7 +14,11 @@ class Account(Base):
     product = Column(String, primary_key=False, index=False)
     cash_account_type = Column(String, primary_key=False, index=False)
     name = Column(String, primary_key=False, index=False)
-    psu_id = Column(Integer, ForeignKey("psu.id"), nullable=False)
+    psu_id = Column(
+        Integer,
+        ForeignKey("psu.id", ondelete="CASCADE"),
+        nullable=False
+    )
 
     psu = relationship("Psu", back_populates="accounts")
     loans = relationship("Loan", back_populates="account")

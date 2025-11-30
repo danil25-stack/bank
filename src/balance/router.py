@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func
 
 from src.database import get_db
 from src.balance import cruds
-from src.balance.schemas import BalanceCreate, BalanceOut
+from src.balance.schemas import BalanceCreate, BalanceOut, PaginatedBalance
+from src.balance.models import Balance
 
 router = APIRouter(
     prefix="/balances",
@@ -24,9 +26,31 @@ async def get_balance(balance_id: int, db: AsyncSession = Depends(get_db)):
     return balance
 
 
-@router.get("/", response_model=list[BalanceOut])
-async def get_all_balances(db: AsyncSession = Depends(get_db)):
-    return await cruds.get_all_balances(db)
+@router.get("/", response_model=PaginatedBalance)
+async def get_all_balances(
+    limit: int = 10,
+    offset: int = 0,
+    db: AsyncSession = Depends(get_db)
+):
+    total_query = await db.execute(select(func.count(Balance.id)))
+    total = total_query.scalar()
+
+    result = await db.execute(
+        select(Balance)
+        .offset(offset)
+        .limit(limit)
+    )
+    items = result.scalars().all()
+
+    for item in items:
+        item.decrypt_fields()
+
+    return PaginatedBalance(
+        total=total,
+        limit=limit,
+        offset=offset,
+        items=items,
+    )
 
 
 @router.delete("/{balance_id}")

@@ -6,7 +6,7 @@ from fastapi import HTTPException
 
 
 async def create_psu(db: AsyncSession, psu: PsuCreate):
-    db_psu = Psu(name=psu.name, email=psu.email)
+    db_psu = Psu(name=psu.name, email=psu.email, psu_number=psu.psu_number)
     db_psu.encrypt_fields()
 
     db.add(db_psu)

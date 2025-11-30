@@ -9,7 +9,7 @@ class Balance(Base):
 
     id = Column(Integer, primary_key=True, index=True, unique=True)
     account_id = Column(Integer, ForeignKey("account.id"), nullable=False)
-    balance_type = Column(String)  # available / booked
+    balance_type = Column(String)
     amount = Column(String)
     currency = Column(String)
     reference_date = Column(Date)
