@@ -1,4 +1,7 @@
+version: "3.9"
+
 services:
+
   web:
     build: .
     container_name: fastapi_web
@@ -16,6 +19,30 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      zookeeper:
+        condition: service_started
+      kafka:
+        condition: service_started
+      listener:
+        condition: service_started
+
+  listener:
+    build: .
+    container_name: listener_service
+    working_dir: /bank
+    command: >
+      sh -c "
+        python -m src.listener
+      "    
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      zookeeper:
+        condition: service_started
+      kafka:
+        condition: service_started
 
   nginx:
     image: nginx:alpine
@@ -58,6 +85,50 @@ services:
       PGADMIN_CONFIG_WTF_CSRF_ENABLED: "False"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    healthcheck:
+      test: [ "CMD", "bash", "-c", "echo srvr | nc localhost 2181 | grep Mode" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: kafka
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:29092,EXTERNAL://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    restart: unless-stopped
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka_ui
+    depends_on:
+      - kafka
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      DYNAMIC_CONFIG_ENABLED: "true"
 
 volumes:
   pgadmin_data:

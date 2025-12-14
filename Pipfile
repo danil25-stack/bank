@@ -10,10 +10,12 @@ psycopg2-binary = "*"
 postgres = "*"
 cryptography = "*"
 sqlalchemy = {extras = ["asyncio"], version = "*"}
-asyncpg = "*"
 pyjwt = "*"
 passlib = {extras = ["bcrypt"], version = "*"}
 bcrypt = "*"
+aiokafka = "*"
+sniffio = "*"
+asyncpg = "*"
 
 [dev-packages]
 
