@@ -12,6 +12,11 @@ from src.auth.router import router as auth_router
 
 
 app = FastAPI()
+
+# =========================
+# ROUTERS
+# =========================
+
 app.include_router(consent_router)
 app.include_router(account_router)
 app.include_router(loan_router)
@@ -22,12 +27,14 @@ app.include_router(loan_schedule_router)
 app.include_router(auth_router)
 
 
-@app.get('/')
+# =========================
+# HEALTHCHECK
+# =========================
+
+@app.get("/")
 def index():
-    return {
-        'message': "Hello World"
-    }
+    return {"message": "Hello World"}
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", reload=True)
+    uvicorn.run("src.main:app", reload=True)

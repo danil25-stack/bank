@@ -1,7 +1,9 @@
 from sqlalchemy import Column, Integer, String, DECIMAL, Date, ForeignKey
+from src.transaction.enums import SourceType
 from src.utils.crypto import encrypt_data, decrypt_data
 from sqlalchemy.orm import relationship
 from src.database import Base
+from sqlalchemy import Enum as SQLEnum
 
 
 class Transaction(Base):
@@ -17,6 +19,11 @@ class Transaction(Base):
     creditor_name = Column(String, nullable=True)
     debtor_name = Column(String, nullable=True)
     remittance_information = Column(String, nullable=True)
+    source_type = Column(
+        SQLEnum(SourceType, name="source_type_enum"),
+        nullable=False,
+        default=SourceType.ATM
+    )
 
     account = relationship("Account", back_populates="transactions")
 

@@ -19,7 +19,7 @@ router = APIRouter(
 async def create_account(
     account: AccountCreate,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(get_current_user)
+    # user: User = Depends(get_current_user)
 ):
     return await cruds.create_account(db, account)
 
@@ -28,7 +28,7 @@ async def create_account(
 async def get_account(
     account_id: int,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(get_current_user)
+    # user: User = Depends(get_current_user)
 ):
     account = await cruds.get_account_by_id(db, account_id)
     if not account:
@@ -41,7 +41,7 @@ async def get_all_accounts(
     limit: int = 10,
     offset: int = 0,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(get_current_user)
+    # user: User = Depends(get_current_user)
 ):
     total_query = await db.execute(select(func.count(Account.id)))
     total = total_query.scalar()
@@ -68,7 +68,7 @@ async def get_all_accounts(
 async def delete_account(
     account_id: int,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(get_current_user)
+    # user: User = Depends(get_current_user)
 ):
     return await cruds.delete_account(db, account_id)
 
@@ -78,6 +78,6 @@ async def update_account(
     account_id: int,
     updated: AccountCreate,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(get_current_user)
+    # user: User = Depends(get_current_user)
 ):
     return await cruds.update_account(db, account_id, updated)
